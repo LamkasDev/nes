@@ -1,9 +1,5 @@
 package main
 
-import (
-	"github.com/veandco/go-sdl2/sdl"
-)
-
 const NesFrameWidth = 256
 const NesFrameHeight = 256
 const NesFrameSize = NesFrameWidth * NesFrameHeight
@@ -12,14 +8,17 @@ type NesFrame struct {
 	Data [NesFrameSize]uint32
 }
 
-func SetFramePixel(frame *NesFrame, x uint32, y uint32, c sdl.Color) {
+func SetFramePixel(frame *NesFrame, x uint32, y uint32, c uint32) {
 	base := y*NesFrameWidth + x
 	if base < NesFrameSize {
-		frame.Data[base] = c.Uint32()
+		frame.Data[base] = c
 	}
 }
 
 func RenderFrame(nes *Nes) {
+	nes.Locks.Renderer.Lock()
+	defer nes.Locks.Renderer.Unlock()
+
 	bank := ControlRegBackgroundPatternAddr(nes)
 	for i := NesPointer(0); i < NesNametableFirst; i++ {
 		ti := NesPointer(MemoryRead(&nes.PPU.VRAM, i))
@@ -36,7 +35,7 @@ func RenderFrame(nes *Nes) {
 				v := (1&low)<<1 | (1 & high)
 				high >>= 1
 				low >>= 1
-				c := ColorRed
+				c := uint32(0)
 				switch v {
 				case 0:
 					c = NesPPUPallete[nes.PPU.Pallete.Full[0]]
@@ -76,7 +75,7 @@ func RenderFrame(nes *Nes) {
 				v := (1&low)<<1 | (1 & high)
 				high >>= 1
 				low >>= 1
-				c := ColorRed
+				c := uint32(0)
 				switch v {
 				case 0:
 					continue
@@ -95,7 +94,6 @@ func RenderFrame(nes *Nes) {
 				} else {
 					py = uint32(ty) + uint32(y)
 				}
-
 				SetFramePixel(&RendererFrame, px, py, c)
 			}
 		}

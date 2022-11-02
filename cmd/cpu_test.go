@@ -88,7 +88,7 @@ func TestAddressingModes(t *testing.T) {
 	nes.CPU.IndexX = 0x0f
 	nes.CPU.IndexY = 0x0f
 
-	AddressingModeCheck(t, &nes, AddressingModeImmediate, nes.Bus.Mapper.Sections[NesMapperSectionTypeROM].Start)
+	AddressingModeCheck(t, &nes, AddressingModeImmediate, nes.Bus.Mapper.ROMStart)
 	AddressingModeCheck(t, &nes, AddressingModeZeroPage, 0x00fe)
 	AddressingModeCheck(t, &nes, AddressingModeZeroPageX, WrappingAdd8Ptr(0x00fe, nes.CPU.IndexX))
 	AddressingModeCheck(t, &nes, AddressingModeZeroPageY, WrappingAdd8Ptr(0x00fe, nes.CPU.IndexY))
@@ -204,7 +204,7 @@ func Branch(t *testing.T, code uint8, jumpFlags []NesCPUStatus, continueFlags []
 		Flags: jumpFlags,
 		CheckResults: map[string]InstructionTestCheck{
 			"Expected branch jump": func(nes *Nes) bool {
-				return nes.CPU.Counter == nes.Bus.Mapper.Sections[NesMapperSectionTypeROM].Start+5
+				return nes.CPU.Counter == nes.Bus.Mapper.ROMStart+5
 			},
 		},
 	}
@@ -213,7 +213,7 @@ func Branch(t *testing.T, code uint8, jumpFlags []NesCPUStatus, continueFlags []
 	test.Flags = continueFlags
 	test.CheckResults = map[string]InstructionTestCheck{
 		"Unexpected branch jump": func(nes *Nes) bool {
-			return nes.CPU.Counter == nes.Bus.Mapper.Sections[NesMapperSectionTypeROM].Start+3
+			return nes.CPU.Counter == nes.Bus.Mapper.ROMStart+3
 		},
 	}
 	RunInstructionTest(t, test)

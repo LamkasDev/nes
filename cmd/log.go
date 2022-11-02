@@ -7,7 +7,7 @@ import (
 )
 
 var LogInfoEnabled = true
-var LogTraceEnabled = false
+var LogTraceEnabled = true
 var LogWarnEnabled = true
 
 func check(e error) {

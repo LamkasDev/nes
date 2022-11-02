@@ -1,8 +1,10 @@
 package main
 
 type NesMapperSectionGroup struct {
-	Points   map[NesPointer]NesMapperSection
-	Sections map[NesMapperSectionType]NesMapperSection
+	Points    map[NesPointer]NesMapperSection
+	Sections  []NesMapperSection
+	ROMStart  NesPointer
+	VRAMStart NesPointer
 }
 
 func InitializeMapperSectionGroup(nes *Nes, group *NesMapperSectionGroup) {

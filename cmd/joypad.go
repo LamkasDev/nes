@@ -32,33 +32,28 @@ type NesJoypad struct {
 	Mapping map[sdl.Scancode]NesJoypadButton
 }
 
-func SetupJoypads(nes *Nes) {
-	nes.Joypads = append(nes.Joypads, NesJoypad{Mapping: NesDefaultJoypadMapping})
-	nes.Joypads = append(nes.Joypads, NesJoypad{Mapping: NesDefaultJoypadMapping})
-}
-
-func JoypadRead(joypad *NesJoypad) NesJoypadButton {
-	if joypad.Index > 7 {
+func JoypadRead(nes *Nes, i uint8) NesJoypadButton {
+	if nes.Joypads[i].Index > 7 {
 		return 1
 	}
-	data := (joypad.Status & (1 << joypad.Index)) >> joypad.Index
-	if !joypad.Strobe && joypad.Index <= 7 {
-		joypad.Index += 1
+	data := (nes.Joypads[i].Status & (1 << nes.Joypads[i].Index)) >> nes.Joypads[i].Index
+	if !nes.Joypads[i].Strobe && nes.Joypads[i].Index <= 7 {
+		nes.Joypads[i].Index += 1
 	}
 	return data
 }
 
-func JoypadWrite(joypad *NesJoypad, data NesJoypadButton) {
-	joypad.Strobe = data&1 == 1
-	if joypad.Strobe {
-		joypad.Index = 0
+func JoypadWrite(nes *Nes, i uint8, data NesJoypadButton) {
+	nes.Joypads[i].Strobe = data&1 == 1
+	if nes.Joypads[i].Strobe {
+		nes.Joypads[i].Index = 0
 	}
 }
 
-func JoypadSet(joypad *NesJoypad, button NesJoypadButton, state bool) {
+func JoypadSet(nes *Nes, i uint8, button NesJoypadButton, state bool) {
 	if state {
-		joypad.Status = NesJoypadButton(BitflagSet(uint8(joypad.Status), uint8(button)))
+		nes.Joypads[i].Status = NesJoypadButton(BitflagSet(uint8(nes.Joypads[i].Status), uint8(button)))
 	} else {
-		joypad.Status = NesJoypadButton(BitflagClear(uint8(joypad.Status), uint8(button)))
+		nes.Joypads[i].Status = NesJoypadButton(BitflagClear(uint8(nes.Joypads[i].Status), uint8(button)))
 	}
 }

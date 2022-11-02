@@ -10,7 +10,7 @@ const NesRendererFps = 90
 
 var RendererFrame NesFrame
 
-type Renderer struct {
+type NesRenderer struct {
 	Window   *sdl.Window
 	Surface  *sdl.Surface
 	Renderer *sdl.Renderer
@@ -36,8 +36,6 @@ func SetupRenderer(nes *Nes) {
 	check(err)
 
 	nes.Renderer.Pitch = int(NesFrameWidth * 4)
-
-	// ShowTileBank(nes, 0)
 }
 
 func CycleRenderer(nes *Nes) {
@@ -47,7 +45,7 @@ func CycleRenderer(nes *Nes) {
 	nes.Renderer.Renderer.Present()
 }
 
-func CleanRenderer(renderer *Renderer) {
+func CleanRenderer(renderer *NesRenderer) {
 	renderer.Texture.Destroy()
 	renderer.Renderer.Destroy()
 	renderer.Window.Destroy()

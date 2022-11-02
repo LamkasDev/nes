@@ -9,13 +9,13 @@ func CycleInput(nes *Nes) {
 			nes.Cycling = false
 			nes.Running = false
 		case *sdl.KeyboardEvent:
-			for _, joypad := range nes.Joypads[:1] {
-				button, ok := joypad.Mapping[t.Keysym.Scancode]
+			for i := range nes.Joypads {
+				button, ok := nes.Joypads[i].Mapping[t.Keysym.Scancode]
 				if ok {
 					if t.Type == sdl.KEYDOWN {
-						JoypadSet(&joypad, button, true)
+						JoypadSet(nes, uint8(i), button, true)
 					} else {
-						JoypadSet(&joypad, button, false)
+						JoypadSet(nes, uint8(i), button, false)
 					}
 				}
 			}

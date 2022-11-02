@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 )
 
@@ -77,9 +76,8 @@ func Trace(nes *Nes) string {
 	asmStr := fmt.Sprintf("%04X  %v %v %v", nes.CPU.Counter, PadString(hexStr, 8), PadStringRight(entry.Name, 4), tmp)
 
 	return fmt.Sprintf(
-		"%v A:%02X X:%02X Y:%02X P:%02X SP:%02X PPU:%v,%v CYC:%v",
+		"%v A:%02X X:%02X Y:%02X P:%02X SP:%02X",
 		PadString(asmStr, 47), nes.CPU.Accumulator, nes.CPU.IndexX, nes.CPU.IndexY, nes.CPU.Status, nes.CPU.Stack,
-		PadStringRight(strconv.Itoa(int(nes.PPU.Scanline)), 3), PadStringRight(strconv.Itoa(int(nes.PPU.Cycles)), 3), nes.Bus.Cycles,
 	)
 }
 

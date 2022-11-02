@@ -11,8 +11,7 @@ type NesCPU struct {
 	Counter     NesPointer
 	Status      NesCPUStatus
 	Stack       NesStackPointer
-
-	Table NesCPUTable
+	Table       NesCPUTable
 }
 
 func CycleCPU(nes *Nes) {
@@ -24,6 +23,11 @@ func CycleCPU(nes *Nes) {
 	// Trace
 	if LogTraceEnabled {
 		fmt.Println(Trace(nes))
+	}
+	if nes.CPU.Counter >= 0xcf2f {
+		if nes.Bus.RAM.Full[0] != 0 {
+			fmt.Print("vasfdbafdb db")
+		}
 	}
 
 	// Process instruction
@@ -39,7 +43,7 @@ func ResetCPU(nes *Nes) {
 	nes.CPU.Stack = NesStackReset
 	nes.CPU.Status = NesInitialStatus
 
-	nes.CPU.Counter = nes.Bus.Mapper.Sections[NesMapperSectionTypeROM].Start
+	nes.CPU.Counter = nes.Bus.Mapper.ROMStart
 }
 
 func Interrupt(nes *Nes, interrupt NesInterrupt) {

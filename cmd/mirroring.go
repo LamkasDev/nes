@@ -10,7 +10,7 @@ type NesMirroring uint8
 
 func MirrorVRAMAddress(nes *Nes, address NesPointer) NesPointer {
 	address &= NesPPUMirrorVRAM
-	vramIndex := address - nes.PPU.Mapper.Sections[NesMapperSectionTypePPUVram].Start
+	vramIndex := address - nes.PPU.Mapper.VRAMStart
 	table := vramIndex / NesNametableSize
 	switch nes.Bus.ROM.Mirroring {
 	case NesMirroringVertical:

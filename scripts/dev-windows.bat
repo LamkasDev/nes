@@ -7,4 +7,4 @@ go build -o ..\bin\nes.exe .
 cd ..
 
 :: Run
-.\bin\nes.exe
+.\bin\nes.exe -d
