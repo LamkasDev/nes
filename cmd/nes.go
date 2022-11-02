@@ -6,9 +6,11 @@ type Nes struct {
 	CycleDelay    float32
 	RendererDelay float32
 
-	CPU      NesCPU
-	PPU      NesPPU
-	Bus      NesBus
+	CPU     NesCPU
+	PPU     NesPPU
+	Bus     NesBus
+	Joypads []NesJoypad
+
 	Renderer Renderer
 }
 
@@ -21,6 +23,7 @@ func SetupNES() Nes {
 	}
 	SetupCPUTable(&nes)
 	SetupPPU(&nes)
+	SetupJoypads(&nes)
 	ResetCPU(&nes)
 
 	return nes

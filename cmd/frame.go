@@ -21,38 +21,83 @@ func SetFramePixel(frame *NesFrame, x uint32, y uint32, c sdl.Color) {
 
 func RenderFrame(nes *Nes) {
 	bank := ControlRegBackgroundPatternAddr(nes)
-
 	for i := NesPointer(0); i < NesNametableFirst; i++ {
 		ti := NesPointer(MemoryRead(&nes.PPU.VRAM, i))
 		tc := i % NesNametableTilesWidth
 		tr := i / NesNametableTilesHeight
-		ts := bank + (ti * 16)
-		tile := MemoryReadLen(&nes.Bus.ROM.Graphics, ts, 16)
-		// pallete := GetBackgroundPalette(nes, uint16(tc), uint16(tr))
+		ts := bank + (ti * NesTileSize)
+		tile := MemoryReadLen(&nes.Bus.ROM.Graphics, ts, NesTileSize)
+		pallete := GetBackgroundPalette(nes, uint16(tc), uint16(tr))
 
-		for y := 0; y < NesTileSize; y++ {
+		for y := 0; y < NesTileHeight; y++ {
 			high := tile[y]
-			low := tile[y+NesTileSize]
-			for x := (NesTileSize - 1); x >= 0; x-- {
-				v := (1&high)<<1 | (1 & low)
+			low := tile[y+NesTileHeight]
+			for x := (NesTileWidth - 1); x >= 0; x-- {
+				v := (1&low)<<1 | (1 & high)
 				high >>= 1
 				low >>= 1
 				c := ColorRed
 				switch v {
 				case 0:
-					c = NesPPUPallete[0x01]
-				case 1:
-					c = NesPPUPallete[0x23]
-				case 2:
-					c = NesPPUPallete[0x27]
-				case 3:
-					c = NesPPUPallete[0x30]
+					c = NesPPUPallete[nes.PPU.Pallete.Full[0]]
+				case 1, 2, 3:
+					c = NesPPUPallete[pallete[v]]
 				}
-				px := uint32(tc*NesTileSize) + uint32(x)
-				py := uint32(tr*NesTileSize) + uint32(y)
+				px := uint32(tc*NesTileWidth) + uint32(x)
+				py := uint32(tr*NesTileHeight) + uint32(y)
 				SetFramePixel(&RendererFrame, px, py, c)
 			}
-			CycleRenderer(nes)
+		}
+	}
+
+	bank = ControlRegSpritePatternAddr(nes)
+	for i := len(nes.PPU.OAM.Full) - 4; i >= 0; i -= 4 {
+		ti := NesPointer(MemoryRead(&nes.PPU.OAM, NesPointer(i+1)))
+		tx := MemoryRead(&nes.PPU.OAM, NesPointer(i+3))
+		ty := MemoryRead(&nes.PPU.OAM, NesPointer(i))
+		ts := bank + (ti * NesTileSize)
+		tile := MemoryReadLen(&nes.Bus.ROM.Graphics, ts, NesTileSize)
+
+		spByte := MemoryRead(&nes.PPU.OAM, NesPointer(i+2))
+		flipVertical, flipHorizontal := false, false
+		if spByte>>7&1 == 1 {
+			flipVertical = true
+		}
+		if spByte>>6&1 == 1 {
+			flipHorizontal = true
+		}
+		palleteIndex := spByte & 0b11
+		pallete := GetSpritePalette(nes, palleteIndex)
+
+		for y := 0; y < NesTileHeight; y++ {
+			high := tile[y]
+			low := tile[y+NesTileHeight]
+			for x := (NesTileWidth - 1); x >= 0; x-- {
+				v := (1&low)<<1 | (1 & high)
+				high >>= 1
+				low >>= 1
+				c := ColorRed
+				switch v {
+				case 0:
+					continue
+				case 1, 2, 3:
+					c = NesPPUPallete[pallete[v]]
+				}
+
+				px, py := uint32(0), uint32(0)
+				if flipHorizontal {
+					px = (uint32(tx) + 7) - uint32(x)
+				} else {
+					px = uint32(tx) + uint32(x)
+				}
+				if flipVertical {
+					py = (uint32(ty) + 7) - uint32(y)
+				} else {
+					py = uint32(ty) + uint32(y)
+				}
+
+				SetFramePixel(&RendererFrame, px, py, c)
+			}
 		}
 	}
 }

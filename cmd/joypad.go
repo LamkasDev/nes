@@ -1,5 +1,7 @@
 package main
 
+import "github.com/veandco/go-sdl2/sdl"
+
 const (
 	NesJoypadButtonRight  = NesJoypadButton(0b1000_0000)
 	NesJoypadButtonLeft   = NesJoypadButton(0b0100_0000)
@@ -11,11 +13,28 @@ const (
 	NesJoypadButtonA      = NesJoypadButton(0b0000_0001)
 )
 
+var NesDefaultJoypadMapping = map[sdl.Scancode]NesJoypadButton{
+	sdl.SCANCODE_RIGHT:  NesJoypadButtonRight,
+	sdl.SCANCODE_LEFT:   NesJoypadButtonLeft,
+	sdl.SCANCODE_DOWN:   NesJoypadButtonDown,
+	sdl.SCANCODE_UP:     NesJoypadButtonUp,
+	sdl.SCANCODE_RETURN: NesJoypadButtonStart,
+	sdl.SCANCODE_SPACE:  NesJoypadButtonSelect,
+	sdl.SCANCODE_S:      NesJoypadButtonB,
+	sdl.SCANCODE_A:      NesJoypadButtonA,
+}
+
 type NesJoypadButton uint8
 type NesJoypad struct {
-	Strobe bool
-	Index  uint8
-	Status NesJoypadButton
+	Strobe  bool
+	Index   uint8
+	Status  NesJoypadButton
+	Mapping map[sdl.Scancode]NesJoypadButton
+}
+
+func SetupJoypads(nes *Nes) {
+	nes.Joypads = append(nes.Joypads, NesJoypad{Mapping: NesDefaultJoypadMapping})
+	nes.Joypads = append(nes.Joypads, NesJoypad{Mapping: NesDefaultJoypadMapping})
 }
 
 func JoypadRead(joypad *NesJoypad) NesJoypadButton {
@@ -33,5 +52,13 @@ func JoypadWrite(joypad *NesJoypad, data NesJoypadButton) {
 	joypad.Strobe = data&1 == 1
 	if joypad.Strobe {
 		joypad.Index = 0
+	}
+}
+
+func JoypadSet(joypad *NesJoypad, button NesJoypadButton, state bool) {
+	if state {
+		joypad.Status = NesJoypadButton(BitflagSet(uint8(joypad.Status), uint8(button)))
+	} else {
+		joypad.Status = NesJoypadButton(BitflagClear(uint8(joypad.Status), uint8(button)))
 	}
 }

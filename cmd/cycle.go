@@ -17,6 +17,7 @@ func CycleGlobal(nes *Nes) {
 		if diffCycle > int64(nes.CycleDelay) {
 			lastCycle = currentCycle
 			CycleCPU(nes)
+			CycleInput(nes)
 		}
 		// Renderer
 		diffRendererCycle := (currentCycle - lastRendererCycle).Microseconds()
@@ -24,10 +25,8 @@ func CycleGlobal(nes *Nes) {
 			lastRendererCycle = currentCycle
 			CycleRenderer(nes)
 		}
-
-		CycleSDL(nes)
 	}
 	for nes.Running {
-		CycleSDL(nes)
+		CycleInput(nes)
 	}
 }

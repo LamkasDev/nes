@@ -15,8 +15,8 @@ func CreateBusMapperSectionGroup(nes *Nes) NesMapperSectionGroup {
 	sections[NesMapperSectionTypePPU] = CreatePPUMapper(0x2008, 0x3fff, 0x2007)
 	points[0x4014] = CreatePPUOamDmaMapper(0x4014)
 	sections[NesMapperSectionTypeAPU] = CreateAPUMapper(0x4000, 0x4015)
-	points[0x4016] = CreateJoypadMapper(NesMapperSectionTypeJoypad1, 0x4016)
-	points[0x4017] = CreateJoypadMapper(NesMapperSectionTypeJoypad2, 0x4017)
+	points[0x4016] = CreateJoypadMapper(NesMapperSectionTypeJoypad, 0x4016, 0)
+	points[0x4017] = CreateNullSilentPointMapper(0x4017)
 
 	switch nes.Bus.ROM.Mapper {
 	case 0:

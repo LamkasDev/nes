@@ -5,9 +5,11 @@ import "github.com/veandco/go-sdl2/sdl"
 const NesNametableFirst = 0x03c0
 const NesNametableTilesWidth = 32
 const NesNametableTilesHeight = 32
-const NesTileSize = 8
-const NesTilePalleteSize = 4
-const NesSpritePalleteStart = (NesTilePalleteSize * 4) + 1
+const NesAttributeQuadrantTiles = 4
+const NesTileWidth = 8
+const NesTileHeight = 8
+const NesTileSize = 16
+const NesSpritePalleteStart = (NesAttributeQuadrantTiles * 4) + 1
 
 var NesPPUPallete = [64]sdl.Color{
 	{0x80, 0x80, 0x80, 0xff}, {0x00, 0x3D, 0xA6, 0xff}, {0x00, 0x12, 0xB0, 0xff}, {0x44, 0x00, 0x96, 0xff}, {0xA1, 0x00, 0x5E, 0xff},
@@ -26,10 +28,10 @@ var NesPPUPallete = [64]sdl.Color{
 }
 
 func GetBackgroundPalette(nes *Nes, tc uint16, tr uint16) [4]uint8 {
-	attrIndex := (tr/NesTilePalleteSize)*NesTileSize + (tc / NesTilePalleteSize)
+	attrIndex := (tr/NesAttributeQuadrantTiles)*NesTileWidth + (tc / NesAttributeQuadrantTiles)
 	attrByte := MemoryRead(&nes.PPU.VRAM, NesNametableFirst+NesPointer(attrIndex))
-	pc := (tc % NesTilePalleteSize) / 2
-	pr := (tr % NesTilePalleteSize) / 2
+	pc := (tc % NesAttributeQuadrantTiles) / 2
+	pr := (tr % NesAttributeQuadrantTiles) / 2
 	pi := uint8(0)
 	switch pc {
 	case 0:
@@ -48,11 +50,11 @@ func GetBackgroundPalette(nes *Nes, tc uint16, tr uint16) [4]uint8 {
 		}
 	}
 
-	start := NesPointer(1 + (pi * NesTilePalleteSize))
-	return [NesTilePalleteSize]uint8{MemoryRead(&nes.PPU.Pallete, 0), MemoryRead(&nes.PPU.Pallete, start), MemoryRead(&nes.PPU.Pallete, start+1), MemoryRead(&nes.PPU.Pallete, start+2)}
+	start := NesPointer(1 + (pi * NesAttributeQuadrantTiles))
+	return [NesAttributeQuadrantTiles]uint8{MemoryRead(&nes.PPU.Pallete, 0), MemoryRead(&nes.PPU.Pallete, start), MemoryRead(&nes.PPU.Pallete, start+1), MemoryRead(&nes.PPU.Pallete, start+2)}
 }
 
-func GetSpritePalette(nes *Nes, i uint16) [4]uint8 {
-	start := NesPointer(NesSpritePalleteStart + (i * NesTilePalleteSize))
-	return [NesTilePalleteSize]uint8{0, MemoryRead(&nes.PPU.Pallete, start), MemoryRead(&nes.PPU.Pallete, start+1), MemoryRead(&nes.PPU.Pallete, start+2)}
+func GetSpritePalette(nes *Nes, i uint8) [4]uint8 {
+	start := NesPointer(NesSpritePalleteStart + (i * NesAttributeQuadrantTiles))
+	return [NesAttributeQuadrantTiles]uint8{0, MemoryRead(&nes.PPU.Pallete, start), MemoryRead(&nes.PPU.Pallete, start+1), MemoryRead(&nes.PPU.Pallete, start+2)}
 }

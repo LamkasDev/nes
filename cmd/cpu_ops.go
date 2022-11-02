@@ -3,7 +3,8 @@ package main
 // No OP
 func ProcessOpNone(nes *Nes, mode AddressingMode) {}
 func ProcessOpNoneRead(nes *Nes, mode AddressingMode) {
-	_, cross := GetOpAddressCross(nes, mode)
+	addr, cross := GetOpAddressCross(nes, mode)
+	BusMemoryRead(nes, addr)
 	CheckCross(nes, cross)
 }
 
