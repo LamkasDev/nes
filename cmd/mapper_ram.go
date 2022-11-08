@@ -16,8 +16,12 @@ func CreateRamMapperRaw(start NesPointer, end NesPointer, getAddress NesMapperSe
 	section := CreateMapperSection(NesMapperSectionTypeRAM, start, end)
 	section.Initialize = func(nes *Nes) { nes.Bus.RAM.Full = make([]byte, GetMapperSectionSize(section)) }
 	section.GetAddress = getAddress
-	section.Read = func(nes *Nes, address NesPointer) byte { return MemoryRead(&nes.Bus.RAM, address) }
-	section.Write = func(nes *Nes, address NesPointer, data []byte) { MemoryWrite(&nes.Bus.RAM, address, data) }
+	section.Read = func(nes *Nes, address NesPointer) byte {
+		return MemoryRead(&nes.Bus.RAM, address)
+	}
+	section.Write = func(nes *Nes, address NesPointer, data []byte) {
+		MemoryWrite(&nes.Bus.RAM, address, data)
+	}
 
 	return section
 }

@@ -24,11 +24,6 @@ func CycleCPU(nes *Nes) {
 	if LogTraceEnabled {
 		fmt.Println(Trace(nes))
 	}
-	if nes.CPU.Counter >= 0xcf2f {
-		if nes.Bus.RAM.Full[0] != 0 {
-			fmt.Print("vasfdbafdb db")
-		}
-	}
 
 	// Process instruction
 	op := NesInstruction(BusMemoryRead(nes, nes.CPU.Counter))
@@ -51,8 +46,8 @@ func Interrupt(nes *Nes, interrupt NesInterrupt) {
 	flag := nes.CPU.Status
 	flag |= interrupt.Mask
 	StackPush(nes, uint8(flag))
-
 	StatusSet(nes, NesCPUStatusInterruptDisable)
-	BusTick(nes, 2)
+
+	BusTick(nes, uint32(interrupt.Cycles))
 	nes.CPU.Counter = BusMemoryReadAddress(nes, interrupt.Vector)
 }

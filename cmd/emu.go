@@ -13,7 +13,7 @@ func main() {
 	SetupRenderer(&nes)
 
 	wd, _ := os.Getwd()
-	CreateRomAndLoad(&nes, filepath.Join(wd, "data", "nestest.nes"))
+	CreateRomAndLoad(&nes, filepath.Join(wd, "data", "pacman.nes"))
 
 	flagDebug := flag.Bool("d", false, "runs in debug mode")
 	flag.Parse()

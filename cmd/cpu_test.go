@@ -60,14 +60,16 @@ func RunInstructionTest(suite *testing.T, test InstructionTest) Nes {
 		}
 	}
 	if test.CheckMemory != nil {
-		if !bytes.Equal(MemoryReadLen(&nes.Bus.RAM, 0, uint16(len(test.CheckMemory))), test.CheckMemory) {
-			suite.Fatalf("Expected %v in memory", test.CheckMemory)
+		b := MemoryReadLen(&nes.Bus.RAM, 0, uint16(len(test.CheckMemory)))
+		if !bytes.Equal(b, test.CheckMemory) {
+			suite.Fatalf("Expected %v in memory (v: %v)", test.CheckMemory, b)
 		}
 	}
 	if test.CheckStack != nil {
 		addr := NesRAMStackStart + NesPointer(nes.CPU.Stack) + 1
-		if !bytes.Equal(MemoryReadLen(&nes.Bus.RAM, addr, StackSize(&nes)+1), test.CheckStack) {
-			suite.Fatalf("Expected %v in stack", test.CheckStack)
+		b := MemoryReadLen(&nes.Bus.RAM, addr, StackSize(&nes)+1)
+		if !bytes.Equal(b, test.CheckStack) {
+			suite.Fatalf("Expected %v in stack (v: %v)", test.CheckStack, b)
 		}
 	}
 
@@ -97,39 +99,12 @@ func TestAddressingModes(t *testing.T) {
 	AddressingModeCheck(t, &nes, AddressingModeAbsoluteY, WrappingAddPtr(0xeffe, NesPointer(nes.CPU.IndexY)))
 
 	indX := WrappingAdd8Ptr(0x00fe, nes.CPU.IndexX)
-	copy(MemoryReadLen(&nes.Bus.RAM, indX, 1), []byte{0xef, 0xfe})
+	copy(nes.Bus.RAM.Full[indX:], []byte{0xef, 0xfe})
 	AddressingModeCheck(t, &nes, AddressingModeIndirectX, 0xfeef)
 
 	indY := NesPointer(0x00fe)
-	copy(MemoryReadLen(&nes.Bus.RAM, indY, 1), []byte{0xef, 0xfe})
+	copy(nes.Bus.RAM.Full[indY:], []byte{0xef, 0xfe})
 	AddressingModeCheck(t, &nes, AddressingModeIndirectY, WrappingAddPtr(0xfeef, NesPointer(nes.CPU.IndexY)))
-}
-
-// Trace test
-func TestTrace(t *testing.T) {
-	nes := SetupNES()
-	BusMemoryWrite(&nes, 100, []byte{0xa2, 0x01, 0xca, 0x88, 0x00})
-
-	nes.CPU.Counter = 0x64
-	nes.CPU.Accumulator = 1
-	nes.CPU.IndexX = 2
-	nes.CPU.IndexY = 3
-	r1 := Trace(&nes)
-	CycleCPU(&nes)
-	r2 := Trace(&nes)
-	CycleCPU(&nes)
-	r3 := Trace(&nes)
-	CycleCPU(&nes)
-
-	if r1 != "0064  A2 01     LDX #$01                        A:01 X:02 Y:03 P:24 SP:FD" {
-		t.Fatalf(r1)
-	}
-	if r2 != "0066  CA        DEX                             A:01 X:01 Y:03 P:24 SP:FD" {
-		t.Fatalf(r2)
-	}
-	if r3 != "0067  88        DEY                             A:01 X:00 Y:03 P:26 SP:FD" {
-		t.Fatalf(r3)
-	}
 }
 
 // ADC instructions
@@ -499,7 +474,7 @@ func TestOpJSR(t *testing.T) {
 		CheckResults: map[string]InstructionTestCheck{
 			"Expected jump": func(nes *Nes) bool { return nes.CPU.Counter == (0x0d0d)+1 },
 		},
-		CheckStack: []byte{0x02, 0xc0},
+		CheckStack: []byte{0x02, 0x80},
 	}
 	RunInstructionTest(t, test)
 }

@@ -22,7 +22,7 @@ func CreateBusMapperSectionGroup(nes *Nes) NesMapperSectionGroup {
 
 	switch nes.Bus.ROM.Mapper {
 	case 0:
-		group.Sections = append(group.Sections, CreateRamMapperMirror(0x0000, 0x1fff, 0x7ff))
+		group.Sections = append(group.Sections, CreateRamMapperMirror(0x0000, 0x1fff, 0x800))
 		group.Sections = append(group.Sections, CreateRomMapperMirror(0x8000, 0xffff, 0x4000))
 		group.ROMStart = 0x8000
 	case 3:
